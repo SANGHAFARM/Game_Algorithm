@@ -122,7 +122,7 @@ int main()
 
 //#include <iostream>
 //
-//void divide(int lt, int rt, int* array)
+//void divide(int lt, int rt, int* array, int* tmpArray)
 //{
 //	int mid;
 //	int p1, p2, p3;
@@ -131,10 +131,10 @@ int main()
 //	{
 //		mid = (lt + rt) / 2;
 //
-//		divide(lt, mid, array);
-//		divide(mid + 1, rt, array);
+//		divide(lt, mid, array, tmpArray);
+//		divide(mid + 1, rt, array, tmpArray);
 //
-//		int* tmp = new int[rt + 1];
+//
 //
 //		p1 = lt;
 //		p2 = mid + 1;
@@ -144,13 +144,13 @@ int main()
 //		{
 //			if (array[p1] < array[p2])
 //			{
-//				tmp[p3] = array[p1];
+//				tmpArray[p3] = array[p1];
 //				p1++;
 //				p3++;
 //			}
 //			else
 //			{
-//				tmp[p3] = array[p2];
+//				tmpArray[p3] = array[p2];
 //				p2++;
 //				p3++;
 //			}
@@ -158,37 +158,38 @@ int main()
 //
 //		while (p1 <= mid)
 //		{
-//			tmp[p3] = array[p1];
+//			tmpArray[p3] = array[p1];
 //			p1++;
 //			p3++;
 //		}
 //
 //		while (p2 <= rt)
 //		{
-//			tmp[p3] = array[p2];
+//			tmpArray[p3] = array[p2];
 //			p2++;
 //			p3++;
 //		}
 //
 //		for (int i = lt; i <= rt; i++)
 //		{
-//			array[i] = tmp[i];
+//			array[i] = tmpArray[i];
 //		}
-//
-//		delete[] tmp;
 //	}
 //}
 //
 //int main()
 //{
 //	int array[] = { 5, 2, 8, 4, 1, 7, 3, 6, 9, 10, 15, 13, 14, 12, 17, 16 };
-//
 //	int length = _countof(array);
 //
-//	divide(0, length - 1, array);
+//	int* tmp = new int[length];
+//
+//	divide(0, length - 1, array, tmp);
 //
 //	for (int i = 0; i < length; i++)
 //	{
 //		std::cout << array[i] << " ";
 //	}
+//
+//	delete[] tmp;
 //}
