@@ -134,8 +134,6 @@ int main()
 //		divide(lt, mid, array, tmpArray);
 //		divide(mid + 1, rt, array, tmpArray);
 //
-//
-//
 //		p1 = lt;
 //		p2 = mid + 1;
 //		p3 = lt;
