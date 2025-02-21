@@ -238,15 +238,11 @@ void RedBlackTree::RestructureAfterRemove(Node* node)
 {
 	// 더블 블랙 문제 해결
 	while (node->Parent() != nullptr && node->GetColor() == Color::Black)
-	{
-		// 형제 노드 구하기
+	{		
 		if (node == node->Parent()->Left())
 		{
+			// 형제 노드 구하기
 			Node* sibling = node->Parent()->Right();
-			if (sibling == nil)
-			{
-				break;
-			}
 
 			// Case 1 : 형제 노드가 Red
 			// 해결 : 형제 노드를 Black으로 변경하고, 부모를 Red로 바꾼 후 부모 기준으로 좌회전 또는 우회전
@@ -257,7 +253,7 @@ void RedBlackTree::RestructureAfterRemove(Node* node)
 
 				// 좌회전
 				RotateToLeft(node->Parent());
-				continue;
+				sibling = node->Parent()->Right();
 			}
 
 			// Case 2 : 형제와 형제의 두 자식이 모두 Black
@@ -286,23 +282,16 @@ void RedBlackTree::RestructureAfterRemove(Node* node)
 			// Case 4 : 형제 노드는 Black, 형제의 오른쪽 자식이 Red
 			// 해결 : 형제를 부모와 같은 색으로 설정, 부모를 Black으로 변경, 
 			// 형제의 오른쪽 자식을 Black으로 변경 후 부모 기준 좌회전
-			if (sibling->Right()->GetColor() == Color::Red)
-			{
-				sibling->SetColor(sibling->Parent()->GetColor());
-				sibling->Parent()->SetColor(Color::Black);
-				sibling->Right()->SetColor(Color::Black);
-				RotateToLeft(node->Parent());
-			}
-
-			continue;
+			sibling->SetColor(sibling->Parent()->GetColor());
+			sibling->Parent()->SetColor(Color::Black);
+			sibling->Right()->SetColor(Color::Black);
+			RotateToLeft(node->Parent());
+			node = root;
 		}
 		else
 		{
+			// 형제 노드 구하기
 			Node* sibling = node->Parent()->Left();
-			if (sibling == nil)
-			{
-				break;
-			}
 
 			// Case 1 : 형제 노드가 Red
 			// 해결 : 형제 노드를 Black으로 변경하고, 부모를 Red로 바꾼 후 부모 기준으로 좌회전 또는 우회전
@@ -311,9 +300,9 @@ void RedBlackTree::RestructureAfterRemove(Node* node)
 				sibling->SetColor(Color::Black);
 				node->Parent()->SetColor(Color::Red);
 
-				// 좌회전
+				// 우회전
 				RotateToRight(node->Parent());
-				continue;
+				sibling = node->Parent()->Left();
 			}
 
 			// Case 2 : 형제와 형제의 두 자식이 모두 Black
@@ -342,15 +331,11 @@ void RedBlackTree::RestructureAfterRemove(Node* node)
 			// Case 4 : 형제 노드는 Black, 형제의 오른쪽 자식이 Red
 			// 해결 : 형제를 부모와 같은 색으로 설정, 부모를 Black으로 변경, 
 			// 형제의 오른쪽 자식을 Black으로 변경 후 부모 기준 좌회전
-			if (sibling->Left()->GetColor() == Color::Red)
-			{
-				sibling->SetColor(sibling->Parent()->GetColor());
-				sibling->Parent()->SetColor(Color::Black);
-				sibling->Left()->SetColor(Color::Black);
-				RotateToRight(node->Parent());
-			}
-
-			continue;
+			sibling->SetColor(sibling->Parent()->GetColor());
+			sibling->Parent()->SetColor(Color::Black);
+			sibling->Left()->SetColor(Color::Black);
+			RotateToRight(node->Parent());
+			node = root;
 		}
 	}
 
@@ -476,47 +461,27 @@ Node* RedBlackTree::FindMaxRecursive(Node* node)
 void RedBlackTree::RemoveImpl(Node* node)
 {
 	// 삭제 대상 노드
-	Node* removed = nullptr;
+	Node* removed = node;
 
 	// 삭제할 위치의 대체 노드
-	Node* trail = nil;
-
-	Node* target = node;
+	Node* trail = nullptr;
 
 	// 자손이 하나 이하인 경우
-	if (target->Left() == nil || target->Right() == nil)
+	if (node->Left() == nil || node->Right() == nil)
 	{
-		removed = target;
-
-		// 자손이 하나만 있는 경우		
-		if (node->Left() != nil && node->Right() == nil)
-		{
-			trail = node->Left();
-		}
-		else if (node->Right() != nil && node->Left() == nil)
-		{
-			trail = node->Right();
-		}
+		removed = node;
 	}
 	// 자손이 모두 있는 경우
 	else
 	{
 		// 대체할 노드 검색
 		// 왼쪽 하위 트리에서 가장 큰 값을 대체 노드로 설정
-		removed = FindMaxRecursive(target->Left());
-
-		// 대체 노드가 존재하면 해당 데이터 설정
-		//if (removed != nullptr && removed != nil)
-		//{
-		//	// 현재 노드의 값을 대상 노드의 값으로 변경
-		//	target->SetData(removed->Data());
-		//}
+		removed = FindMaxRecursive(node->Left());
 		
 		// 현재 노드의 값을 대상 노드의 값으로 변경
-		target->SetData(removed->Data());
+		node->SetData(removed->Data());
 	}
 
-	// Todo : 추가 -----------
 	if (removed->Left() != nil)
 	{
 		trail = removed->Left();
@@ -525,23 +490,16 @@ void RedBlackTree::RemoveImpl(Node* node)
 	{
 		trail = removed->Right();
 	}
-	// -------------
 
-	// 예외 처리 (대상 노드가 있는 경우)
-	if (trail != nil)
-	{
-		trail->SetParent(removed->Parent());
-	}
-
-	// removed 노드가 root인 경우
+	// 삭제할 노드가 root라면, trail 노드를 부모로 설정.
 	if (removed->Parent() == nullptr)
 	{
 		root = trail;
+		root->SetColor(Color::Black);
 	}
-	// removed 노드가 root가 아닌 경우
+	// root가 아니라면, trail 노드를 삭제할 노드의 초기 위치로 설정.
 	else
 	{
-		// trail 노드를 removed의 원래 위치로 설정
 		if (removed == removed->Parent()->Left())
 		{
 			removed->Parent()->SetLeft(trail);
@@ -552,15 +510,22 @@ void RedBlackTree::RemoveImpl(Node* node)
 		}
 	}
 
+	// 대체 노드의 부모를 삭제할 노드의 부모로 설정
+	if (trail != nil)
+	{
+		trail->SetParent(removed->Parent());
+	}
+
+	Color removedColor = removed->GetColor();
+	// 노드 삭제
+	SafeDelete(removed);
+
 	// 재정렬 여부 확인 후 진행
-	if (removed->GetColor() == Color::Black && trail != nil)
+	if (removedColor == Color::Black)
 	{
 		// 재정렬 진행
 		RestructureAfterRemove(trail);
 	}
-
-	// 노드 삭제
-	SafeDelete(removed);	
 }
 
 void RedBlackTree::DestroyRecursive(Node* node)
